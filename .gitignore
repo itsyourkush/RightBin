@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite3
+data/*.db
+
+# Environment variables
+.env
+
+# Streamlit
+.streamlit/
+
+# ML Artifacts (Large weights)
+ml/artifacts/*.weights.h5
+ml/artifacts/*.h5
+!ml/artifacts/waste_classifier.keras
+!ml/artifacts/model_metadata.json
+!ml/artifacts/training_history.png
+!ml/artifacts/confusion_matrix.png
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/

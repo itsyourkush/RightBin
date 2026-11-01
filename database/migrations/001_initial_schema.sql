@@ -1,0 +1,3 @@
+-- Migration 001: Initial Schema
+-- Corresponds to initial release v1.0.0
+-- See database/schema.sql for the complete DDL definition.

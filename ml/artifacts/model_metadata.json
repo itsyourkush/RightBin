@@ -1,0 +1,60 @@
+{
+  "model_version": "v2.0.0-mobilenet",
+  "evaluated_at": "2026-11-01T13:10:53.758849+00:00",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "categories": [
+    "Plastic",
+    "Paper",
+    "Organic",
+    "Metal",
+    "Glass"
+  ],
+  "overall_test_accuracy": 0.9433,
+  "confidence_threshold": 0.6,
+  "per_class_metrics": {
+    "Plastic": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1_score": 0.9744,
+      "support": 60.0
+    },
+    "Paper": {
+      "precision": 1.0,
+      "recall": 0.7667,
+      "f1_score": 0.8679,
+      "support": 60.0
+    },
+    "Organic": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 60.0
+    },
+    "Metal": {
+      "precision": 0.7895,
+      "recall": 1.0,
+      "f1_score": 0.8824,
+      "support": 60.0
+    },
+    "Glass": {
+      "precision": 0.9836,
+      "recall": 1.0,
+      "f1_score": 0.9917,
+      "support": 60.0
+    }
+  },
+  "dataset_splits": {
+    "source": "Balanced Multiclass Waste Dataset (Synthesized and Verified Classes)",
+    "categories": [
+      "Plastic",
+      "Paper",
+      "Organic",
+      "Metal",
+      "Glass"
+    ]
+  }
+}

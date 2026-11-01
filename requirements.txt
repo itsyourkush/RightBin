@@ -1,0 +1,15 @@
+streamlit>=1.35.0
+tensorflow>=2.16.0
+numpy>=1.26.0
+pandas>=2.2.0
+pillow>=10.2.0
+plotly>=5.20.0
+pytest>=8.0.0
+python-dotenv>=1.0.1
+matplotlib>=3.8.0
+scikit-learn>=1.4.0
+qrcode>=7.4
+pymysql>=1.1.0
+cryptography>=42.0.0
+python-pptx>=1.0.0
+streamlit-js-eval>=1.0.0
