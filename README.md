@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ♻️ RightBin — "Wet or Dry, Always Right." - Smart Waste Classification System Using CNN, Personal Green Score and Gamification
 
 An integrated, end-to-end, runnable web application designed for campus and municipal automated waste sorting, environmental habit tracking, and eco-incentivization.
