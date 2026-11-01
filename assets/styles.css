@@ -546,6 +546,15 @@ header[data-testid="stHeader"],
 }
 
 /* Nav Item Links — Inactive State */
+[data-testid="stTopNavLink"],
+[data-testid="stTopNavLink"] span,
+[data-testid="stTopNavLink"] p,
+[data-testid="stTopNavLink"] * {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    fill: #334155 !important;
+}
+
 [data-testid="stTopNavLink"] {
     display: inline-flex !important;
     align-items: center !important;
@@ -554,7 +563,6 @@ header[data-testid="stHeader"],
     border-radius: 9999px !important;
     font-size: 0.88rem !important;
     font-weight: 550 !important;
-    color: #475569 !important;
     text-decoration: none !important;
     background: transparent !important;
     border: 1px solid transparent !important;
@@ -565,24 +573,37 @@ header[data-testid="stHeader"],
 /* Inactive Hover State */
 [data-testid="stTopNavLink"]:hover {
     background: #F0FDF4 !important;
-    color: #064E3B !important;
     border-color: #D1FAE5 !important;
     transform: translateY(-1px) !important;
+}
+
+[data-testid="stTopNavLink"]:hover,
+[data-testid="stTopNavLink"]:hover span,
+[data-testid="stTopNavLink"]:hover p,
+[data-testid="stTopNavLink"]:hover * {
+    color: #064E3B !important;
+    fill: #064E3B !important;
 }
 
 /* Active Tab State — Exactly matching Image 2 'Home' Pill */
 [data-testid="stTopNavLink"][aria-current="page"] {
     background: #F0FDF4 !important;
     border: 1px solid #BBF7D0 !important;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+[data-testid="stTopNavLink"][aria-current="page"],
+[data-testid="stTopNavLink"][aria-current="page"] span,
+[data-testid="stTopNavLink"][aria-current="page"] p,
+[data-testid="stTopNavLink"][aria-current="page"] * {
     color: #064E3B !important;
     font-weight: 700 !important;
-    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1) !important;
+    fill: #064E3B !important;
 }
 
 [data-testid="stTopNavLink"][aria-current="page"]:hover {
     background: #DCFCE7 !important;
     border-color: #86EFAC !important;
-    color: #064E3B !important;
 }
 
 [data-testid="stTopNavSection"] {
@@ -726,23 +747,213 @@ iframe[title="streamlit.components.v1.html"]:has(html body script) {
 
 
 
-/* ── Streamlit Native UI Polish ── */
-.stButton > button {
+/* ── Streamlit Native UI Polish & Light Theme Enforcements ── */
+
+/* Text and Headings */
+h1, h2, h3, h4, h5, h6, p, label, span {
+    color: var(--text-main);
+}
+
+/* Form Container */
+[data-testid="stForm"] {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 14px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Input Fields & Base Web Input (Ensures NO black boxes in any mode) */
+[data-baseweb="input"],
+[data-baseweb="base-input"],
+.stTextInput > div > div,
+.stNumberInput > div > div,
+.stSelectbox > div > div,
+.stTextArea > div > div {
+    background-color: #FFFFFF !important;
+    border: 1.5px solid #CBD5E1 !important;
     border-radius: 10px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-baseweb="input"]:focus-within,
+.stTextInput > div > div:focus-within {
+    border-color: #10B981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea,
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    -webkit-text-fill-color: #0F172A !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #94A3B8 !important;
+    -webkit-text-fill-color: #94A3B8 !important;
+}
+
+/* Password Toggle Icon */
+[data-baseweb="input"] svg,
+[data-baseweb="input"] button {
+    color: #64748B !important;
+    fill: #64748B !important;
+}
+
+/* Input Labels */
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] label,
+[data-testid="stWidgetLabel"] p {
+    color: #1E293B !important;
+    font-weight: 650 !important;
+    font-size: 0.92rem !important;
+    margin-bottom: 4px !important;
+}
+
+/* Tabs Styling */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+    border-bottom: 2px solid #E2E8F0 !important;
+    gap: 16px !important;
+    margin-bottom: 1rem !important;
+}
+
+[data-testid="stTabs"] button,
+[data-baseweb="tab"] {
+    background-color: transparent !important;
+    color: #475569 !important;
+    font-size: 0.95rem !important;
     font-weight: 600 !important;
+    padding: 8px 16px !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-testid="stTabs"] button p,
+[data-baseweb="tab"] p {
+    color: #475569 !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stTabs"] button[aria-selected="true"],
+[data-baseweb="tab"][aria-selected="true"] {
+    color: #047857 !important;
+    border-bottom: 3px solid #10B981 !important;
+    background-color: #F0FDF4 !important;
+}
+
+[data-testid="stTabs"] button[aria-selected="true"] p,
+[data-baseweb="tab"][aria-selected="true"] p {
+    color: #047857 !important;
+    font-weight: 700 !important;
+}
+
+/* Primary and Form Submit Buttons */
+.stButton > button,
+.stFormSubmitButton > button,
+button[kind="primary"],
+button[kind="secondaryFormSubmit"],
+button[kind="secondary"] {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.65rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
     letter-spacing: 0.01em !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-    border: none !important;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+.stButton > button:hover,
+.stFormSubmitButton > button:hover,
+button[kind="primary"]:hover,
+button[kind="secondaryFormSubmit"]:hover,
+button[kind="secondary"]:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45) !important;
+    transform: translateY(-2px) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
 }
 
-.stButton > button[kind="primary"]:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.45) !important;
+.stButton > button *,
+.stFormSubmitButton > button *,
+button[kind="primary"] *,
+button[kind="secondaryFormSubmit"] *,
+button[kind="secondary"] * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* Alert / Notification Callouts */
+[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    padding: 0.9rem 1.25rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Warning (Amber / Gold) */
+[data-testid="stAlert"]:has([data-testid="stAlertWarningIcon"]),
+div[data-testid="stAlert"]:has(svg[data-testid="stIconWarning"]),
+[data-testid="stAlert"][data-baseweb="notification"] {
+    background-color: #FEF3C7 !important;
+    border: 1px solid #F59E0B !important;
+}
+
+[data-testid="stAlert"]:has([data-testid="stAlertWarningIcon"]) *,
+div[data-testid="stAlert"]:has(svg[data-testid="stIconWarning"]) *,
+[data-testid="stAlert"][data-baseweb="notification"] * {
+    color: #78350F !important;
+    font-weight: 600 !important;
+}
+
+/* Info (Mint / Emerald) */
+div[data-testid="stAlert"]:has(svg[data-testid="stIconInfo"]) {
+    background-color: #ECFDF5 !important;
+    border: 1px solid #A7F3D0 !important;
+}
+
+div[data-testid="stAlert"]:has(svg[data-testid="stIconInfo"]) * {
+    color: #065F46 !important;
+    font-weight: 600 !important;
+}
+
+/* Success (Vibrant Green) */
+div[data-testid="stAlert"]:has(svg[data-testid="stIconSuccess"]) {
+    background-color: #F0FDF4 !important;
+    border: 1px solid #BBF7D0 !important;
+}
+
+div[data-testid="stAlert"]:has(svg[data-testid="stIconSuccess"]) * {
+    color: #064E3B !important;
+    font-weight: 600 !important;
+}
+
+/* Error (Red) */
+div[data-testid="stAlert"]:has(svg[data-testid="stIconError"]) {
+    background-color: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+}
+
+div[data-testid="stAlert"]:has(svg[data-testid="stIconError"]) * {
+    color: #991B1B !important;
+    font-weight: 600 !important;
 }
 
 /* ── Mobile Overrides ── */

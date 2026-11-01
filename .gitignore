@@ -35,7 +35,8 @@ data/*.db
 .env
 
 # Streamlit
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 
 # ML Artifacts (Large weights)
 ml/artifacts/*.weights.h5

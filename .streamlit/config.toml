@@ -1,0 +1,22 @@
+[server]
+# Bind to all network interfaces so mobile phones and other devices
+# on the same Wi-Fi / LAN can access the application.
+address = "0.0.0.0"
+port = 8501
+headless = true
+enableXsrfProtection = false
+maxUploadSize = 10
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#10B981"
+backgroundColor = "#F8FAFC"
+secondaryBackgroundColor = "#F0FDF4"
+textColor = "#0F172A"
+font = "sans serif"
