@@ -72,7 +72,14 @@ if "latest_redeemed_code" in st.session_state and st.session_state["latest_redee
         """,
         unsafe_allow_html=True,
     )
-    st.code(code_val, language="text")
+    st.markdown(
+        f"""
+        <div style="background: #0F172A; color: #34D399; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.15rem; font-weight: 800; padding: 12px 16px; border-radius: 8px; letter-spacing: 0.08em; user-select: all; border: 1.5px solid #10B981; margin-bottom: 10px; text-align: center;">
+            {code_val}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     if st.button("Dismiss Voucher Notification", key="dismiss_code_btn"):
         st.session_state["latest_redeemed_code"] = None
         st.rerun()
@@ -214,7 +221,14 @@ with tab_history:
                 unsafe_allow_html=True,
             )
             if code_part:
-                st.code(code_part, language="text")
+                st.markdown(
+                    f"""
+                    <div style="background: #F8FAFC; color: #064E3B; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.95rem; font-weight: 700; padding: 8px 12px; border-radius: 6px; border: 1px solid #CBD5E1; user-select: all; margin: 4px 0;">
+                        {code_part}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
                 st.caption("💡 Enter this code in your game settings or Google Play Store > Payments & Subscriptions > Redeem Gift Code.")
             elif r_notes:
                 st.caption(f"Note: {r_notes}")

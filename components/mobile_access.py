@@ -1,7 +1,7 @@
 """
 Mobile Access & Simple Universal QR Code Component.
 Provides a clean, unified QR code for both iOS (Safari) and Android (Chrome / Lens).
-Supports both Cloudflare HTTPS Tunnel and direct Local Wi-Fi (LAN) IP.
+Supports Live Streamlit Cloud, Cloudflare HTTPS Tunnel, and direct Local Wi-Fi (LAN) IP.
 """
 
 from __future__ import annotations
@@ -71,11 +71,30 @@ def detect_lan_ip() -> str:
     return "127.0.0.1"
 
 
+def get_cloud_or_host_url() -> str | None:
+    """Detects if app is deployed on Streamlit Community Cloud or custom domain."""
+    try:
+        if hasattr(st, "context"):
+            if hasattr(st.context, "headers") and st.context.headers:
+                host = st.context.headers.get("host") or st.context.headers.get("Host")
+                if host and ("streamlit.app" in host or "herokuapp.com" in host or "render.com" in host):
+                    return f"https://{host}"
+            if hasattr(st.context, "url") and st.context.url:
+                u = str(st.context.url).split("?")[0].rstrip("/")
+                if "streamlit.app" in u:
+                    return u
+    except Exception:
+        pass
+    return None
+
+
 def render_mobile_access_section(port: int = 8501) -> None:
     """
     Renders a simple, clean, non-chaotic QR code card for both Android and iOS Safari.
-    Allows toggling between Cloudflare HTTPS (mobile data) and Local Wi-Fi (fast LAN).
+    Allows toggling between Cloud / Live URL, Cloudflare HTTPS, and Local Wi-Fi.
+    Avoids using st.code to prevent dynamic chunk import issues.
     """
+    cloud_url = get_cloud_or_host_url()
     https_url = get_public_https_url()
     lan_ip = detect_lan_ip()
     local_wifi_url = f"http://{lan_ip}:{port}"
@@ -99,8 +118,10 @@ def render_mobile_access_section(port: int = 8501) -> None:
                 unsafe_allow_html=True,
             )
 
-            # Connection mode selector
+            # Build available options
             options = []
+            if cloud_url:
+                options.append(f"🌐 Streamlit Cloud Live (HTTPS)")
             if https_url:
                 options.append("🌐 Cloudflare HTTPS (Works Anywhere / 5G)")
             options.append(f"📶 Same Wi-Fi Network ({lan_ip})")
@@ -114,14 +135,26 @@ def render_mobile_access_section(port: int = 8501) -> None:
                 key="qr_connection_mode",
             )
 
-            if "Cloudflare" in connection_mode and https_url:
+            if cloud_url and "Streamlit Cloud" in connection_mode:
+                target_url = cloud_url
+                mode_tip = "🔒 **Cloud HTTPS Active**: Best for mobile camera permissions anywhere."
+            elif https_url and "Cloudflare" in connection_mode:
                 target_url = https_url
-                st.code(target_url, language=None)
-                st.caption("🔒 **HTTPS Active**: Best for iPhone Safari camera permissions. If Safari fails to connect, switch to **Same Wi-Fi Network** above!")
+                mode_tip = "🔒 **Cloudflare HTTPS Active**: Best for iPhone Safari camera permissions on cellular data."
             else:
                 target_url = local_wifi_url
-                st.code(target_url, language=None)
-                st.caption(f"⚡ **Direct Wi-Fi Active**: Your phone must be connected to the **same Wi-Fi** as your Mac.")
+                mode_tip = "⚡ **Direct Wi-Fi Active**: Your phone must be connected to the **same Wi-Fi** as this computer."
+
+            # Render styled URL container instead of st.code to avoid syntax highlighter chunk loads
+            st.markdown(
+                f"""
+                <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 8px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; word-break: break-all; margin: 6px 0;">
+                    <a href="{target_url}" target="_blank" style="color: #047857; text-decoration: none; font-weight: 700;">{target_url}</a>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.caption(mode_tip)
 
         with col_qr:
             if HAS_QRCODE:
