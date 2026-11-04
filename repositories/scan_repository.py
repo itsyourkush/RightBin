@@ -177,6 +177,30 @@ class ScanRepository:
         with get_db_connection(self.db_path) as c:
             return _execute(c)
 
+    def get_recent_scans(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        category: Optional[str] = None,
+        conn: Optional[sqlite3.Connection] = None,
+    ) -> List[Dict[str, Any]]:
+        """Retrieves recent scans across the entire community/system."""
+        if category:
+            query = "SELECT * FROM waste_scans WHERE predicted_category = ? ORDER BY id DESC LIMIT ? OFFSET ?"
+            params = (category, limit, offset)
+        else:
+            query = "SELECT * FROM waste_scans ORDER BY id DESC LIMIT ? OFFSET ?"
+            params = (limit, offset)
+
+        def _execute(c: sqlite3.Connection):
+            rows = c.execute(query, params).fetchall()
+            return [dict(r) for r in rows]
+
+        if conn is not None:
+            return _execute(conn)
+        with get_db_connection(self.db_path) as c:
+            return _execute(c)
+
     def find_duplicate_scans(
         self,
         image_hash: str,

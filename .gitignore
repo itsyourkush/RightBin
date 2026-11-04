@@ -27,9 +27,9 @@ venv/
 ENV/
 
 # Database
-*.db
 *.sqlite3
 data/*.db
+!data/waste_classification.db
 
 # Environment variables
 .env

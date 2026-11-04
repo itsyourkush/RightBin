@@ -26,14 +26,25 @@ st.divider()
 scan_repo = ScanRepository()
 
 # Filters
-col_filter1, col_filter2 = st.columns(2)
+col_filter1, col_filter2, col_filter3 = st.columns([1, 1, 1])
 with col_filter1:
     selected_cat = st.selectbox("Filter by Category:", ["All Categories"] + list(config.categories))
 with col_filter2:
     selected_status = st.selectbox("Filter by Status:", ["All Scans", "Accepted Only", "Discarded Only", "Low Confidence Only"])
+with col_filter3:
+    view_scope = st.selectbox("View Scope:", ["My Scans", "All Scans (Community Archive)"])
 
 cat_param = None if selected_cat == "All Categories" else selected_cat
-scans = scan_repo.get_user_scans(user["id"], limit=100, category=cat_param)
+
+if view_scope == "All Scans (Community Archive)":
+    scans = scan_repo.get_recent_scans(limit=100, category=cat_param)
+else:
+    scans = scan_repo.get_user_scans(user["id"], limit=100, category=cat_param)
+    # If the active user doesn't have personal scans yet, fallback to community scans so history is never blank
+    if not scans:
+        scans = scan_repo.get_recent_scans(limit=100, category=cat_param)
+        if scans:
+            st.info("💡 Displaying verified system scan archive. Start scanning items to see your personal audit trail!")
 
 # Filter by status in memory
 if selected_status == "Accepted Only":

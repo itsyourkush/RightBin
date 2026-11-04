@@ -175,6 +175,14 @@ def init_database(db_path: Optional[Union[str, Path]] = None) -> None:
             )
             logger.info("Created default administrator account: admin@smartwaste.org")
 
+        # 6. Seed Historical Scan Archive (Preserves previous scans across cloud redeployments)
+        if db_path is None or str(db_path) == str(config.db_path):
+            try:
+                from database.historical_seed import seed_historical_archive
+                seed_historical_archive(cursor)
+            except Exception as e:
+                logger.warning(f"Could not load historical scan archive: {e}")
+
         logger.info("Database initialized and seeded successfully.")
 
 
