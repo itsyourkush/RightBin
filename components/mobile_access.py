@@ -1,7 +1,7 @@
 """
-Mobile Access & Simple Universal QR Code Component.
-Provides a clean, unified QR code for both iOS (Safari) and Android (Chrome / Lens).
-Supports Live Streamlit Cloud, Cloudflare HTTPS Tunnel, and direct Local Wi-Fi (LAN) IP.
+Mobile Access & Universal QR Code Component for RightBin.
+Encodes the live Streamlit Cloud HTTPS URL or local Wi-Fi IP so users can scan
+and classify waste items directly using their iPhone Safari or Android camera.
 """
 
 from __future__ import annotations
@@ -9,6 +9,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 import re
+import socket
 import subprocess
 import streamlit as st
 
@@ -21,40 +22,51 @@ except ImportError:
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Default verified production Streamlit Cloud URL
+PRODUCTION_CLOUD_URL = "https://rightbin-wzuhqi3mgruu7flc9ozfmd.streamlit.app"
 
-def get_public_https_url() -> str | None:
-    """Reads the active Cloudflare HTTPS tunnel URL if running."""
-    tunnel_file = PROJECT_ROOT / "data" / "tunnel_url.txt"
-    if tunnel_file.exists():
-        try:
-            url = tunnel_file.read_text().strip()
-            if url.startswith("https://") and "trycloudflare.com" in url:
-                return url
-        except Exception:
-            pass
 
-    log_path = Path("/tmp/tunnel.log")
-    if log_path.exists():
-        try:
-            content = log_path.read_text()
-            matches = re.findall(r"https://[-a-zA-Z0-9]+\.trycloudflare\.com", content)
-            if matches:
-                latest_url = matches[-1]
-                try:
-                    tunnel_file.parent.mkdir(parents=True, exist_ok=True)
-                    tunnel_file.write_text(latest_url)
-                except Exception:
-                    pass
-                return latest_url
-        except Exception:
-            pass
+def get_detected_cloud_url() -> str:
+    """
+    Detects the active Streamlit Cloud or public HTTPS domain from request headers.
+    Falls back to the verified production deployment URL.
+    """
+    try:
+        if hasattr(st, "context"):
+            headers = getattr(st.context, "headers", None) or {}
+            for h in ("x-forwarded-host", "host", "origin", "referer"):
+                val = headers.get(h, "")
+                if val:
+                    clean_host = val.replace("https://", "").replace("http://", "").split("/")[0]
+                    if "streamlit.app" in clean_host or "render.com" in clean_host or "herokuapp.com" in clean_host:
+                        return f"https://{clean_host}"
 
-    return None
+            ctx_url = getattr(st.context, "url", None)
+            if ctx_url:
+                u = str(ctx_url).split("?")[0].rstrip("/")
+                if "streamlit.app" in u:
+                    return u
+    except Exception:
+        pass
+
+    return PRODUCTION_CLOUD_URL
 
 
 def detect_lan_ip() -> str:
     """Detects LAN IP across active network interfaces."""
-    for iface in ("en0", "en1", "en2", "wlan0", "eth0"):
+    # 1. Socket probe (works across macOS, Linux, and Windows)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        if ip and ip != "127.0.0.1" and not ip.startswith("172."):
+            return ip
+    except Exception:
+        pass
+
+    # 2. macOS ipconfig probe
+    for iface in ("en0", "en1", "wlan0", "eth0"):
         try:
             res = subprocess.run(
                 ["ipconfig", "getifaddr", iface],
@@ -68,36 +80,19 @@ def detect_lan_ip() -> str:
         except Exception:
             pass
 
-    return "127.0.0.1"
-
-
-def get_cloud_or_host_url() -> str | None:
-    """Detects if app is deployed on Streamlit Community Cloud or custom domain."""
-    try:
-        if hasattr(st, "context"):
-            if hasattr(st.context, "headers") and st.context.headers:
-                host = st.context.headers.get("host") or st.context.headers.get("Host")
-                if host and ("streamlit.app" in host or "herokuapp.com" in host or "render.com" in host):
-                    return f"https://{host}"
-            if hasattr(st.context, "url") and st.context.url:
-                u = str(st.context.url).split("?")[0].rstrip("/")
-                if "streamlit.app" in u:
-                    return u
-    except Exception:
-        pass
-    return None
+    return "192.168.1.36"
 
 
 def render_mobile_access_section(port: int = 8501) -> None:
     """
-    Renders a simple, clean, non-chaotic QR code card for both Android and iOS Safari.
-    Allows toggling between Cloud / Live URL, Cloudflare HTTPS, and Local Wi-Fi.
-    Avoids using st.code to prevent dynamic chunk import issues.
+    Renders the QR code card for instant mobile scanning.
+    Defaults to the live Streamlit Cloud HTTPS URL so any phone camera
+    can scan and open the page without configuration or local network issues.
     """
-    cloud_url = get_cloud_or_host_url()
-    https_url = get_public_https_url()
+    cloud_base_url = get_detected_cloud_url()
     lan_ip = detect_lan_ip()
-    local_wifi_url = f"http://{lan_ip}:{port}"
+    local_wifi_url = f"http://{lan_ip}:{port}/scan-waste"
+    cloud_scan_url = f"{cloud_base_url}/scan-waste"
 
     with st.container(border=True):
         col_qr, col_info = st.columns([1, 2])
@@ -107,49 +102,59 @@ def render_mobile_access_section(port: int = 8501) -> None:
                 """
                 <div style="padding-top: 2px;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                        <span style="font-size: 1.15rem; font-weight: 800; color: #064E3B;">📱 Open RightBin on Mobile</span>
+                        <span style="font-size: 1.15rem; font-weight: 800; color: #064E3B;">📱 Open RightBin on Mobile Camera</span>
                         <span style="background: #ECFDF5; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; border: 1px solid #A7F3D0;">iOS Safari & Android</span>
                     </div>
-                    <div style="font-size: 0.85rem; color: #475569; margin-bottom: 8px; line-height: 1.4;">
-                        Scan with your <strong>iPhone Camera (Safari)</strong> or <strong>Android (Camera / Google Lens)</strong> to test live image scanning.
+                    <div style="font-size: 0.88rem; color: #475569; margin-bottom: 10px; line-height: 1.45;">
+                        Point your <strong>iPhone Camera (Safari)</strong> or <strong>Android (Camera / Google Lens)</strong> at the QR code to test instant waste scanning with full camera support.
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-            # Build available options
-            options = []
-            if cloud_url:
-                options.append(f"🌐 Streamlit Cloud Live (HTTPS)")
-            if https_url:
-                options.append("🌐 Cloudflare HTTPS (Works Anywhere / 5G)")
-            options.append(f"📶 Same Wi-Fi Network ({lan_ip})")
+            # Available URL modes
+            mode_options = [
+                "🌐 Live Cloud (Works Everywhere / 5G / Mobile Data)",
+                f"📶 Local Wi-Fi Network ({lan_ip})",
+                "✏️ Custom URL",
+            ]
 
-            connection_mode = st.radio(
-                "Select Connection Mode for QR:",
-                options=options,
+            selected_mode = st.radio(
+                "Select QR Connection Mode:",
+                options=mode_options,
                 index=0,
                 horizontal=True,
                 label_visibility="collapsed",
-                key="qr_connection_mode",
+                key="qr_connection_mode_selector",
             )
 
-            if cloud_url and "Streamlit Cloud" in connection_mode:
-                target_url = cloud_url
-                mode_tip = "🔒 **Cloud HTTPS Active**: Best for mobile camera permissions anywhere."
-            elif https_url and "Cloudflare" in connection_mode:
-                target_url = https_url
-                mode_tip = "🔒 **Cloudflare HTTPS Active**: Best for iPhone Safari camera permissions on cellular data."
-            else:
+            if "Live Cloud" in selected_mode:
+                target_url = cloud_scan_url
+                mode_tip = "🔒 **Public HTTPS Live**: Recommended. Works on any smartphone over 5G, 4G, or Wi-Fi with camera permissions enabled."
+            elif "Local Wi-Fi" in selected_mode:
                 target_url = local_wifi_url
-                mode_tip = "⚡ **Direct Wi-Fi Active**: Your phone must be connected to the **same Wi-Fi** as this computer."
+                mode_tip = f"⚡ **Local Wi-Fi Active**: Your phone must be connected to the **same Wi-Fi** network as this computer ({lan_ip})."
+            else:
+                custom_input = st.text_input(
+                    "Enter Custom URL:",
+                    value=cloud_scan_url,
+                    key="custom_qr_url_input",
+                ).strip()
+                target_url = custom_input if custom_input else cloud_scan_url
+                mode_tip = "✏️ **Custom URL Active**: The QR code encodes your custom address."
 
-            # Render styled URL container instead of st.code to avoid syntax highlighter chunk loads
+            # URL Display Box with Clickable Link
             st.markdown(
                 f"""
-                <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 8px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; word-break: break-all; margin: 6px 0;">
-                    <a href="{target_url}" target="_blank" style="color: #047857; text-decoration: none; font-weight: 700;">{target_url}</a>
+                <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 10px 14px; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; word-break: break-all;">
+                        <span style="color: #64748B; font-weight: 600;">Link:</span> 
+                        <a href="{target_url}" target="_blank" style="color: #047857; text-decoration: underline; font-weight: 700;">{target_url}</a>
+                    </div>
+                    <a href="{target_url}" target="_blank" style="background: #10B981; color: white; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; white-space: nowrap;">
+                        Open ↗
+                    </a>
                 </div>
                 """,
                 unsafe_allow_html=True,

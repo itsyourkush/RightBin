@@ -33,6 +33,7 @@ data/*.db
 
 # Environment variables
 .env
+data/tunnel_url.txt
 
 # Streamlit
 .streamlit/*
