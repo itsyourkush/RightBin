@@ -91,3 +91,36 @@ def test_deactivated_user_cannot_login(temp_db, test_user):
     ok, msg, profile = auth.authenticate(test_user["email"], "TestSecret123!")
     assert ok is False
     assert "deactivated" in msg.lower()
+
+
+def test_reset_password_by_email(temp_db, test_user):
+    auth = AuthService(temp_db)
+    email = test_user["email"]
+
+    # Non-existent email
+    ok, msg = auth.reset_password_by_email("unknown@nowhere.com", "NewValidPass123!", "NewValidPass123!")
+    assert ok is False
+    assert "no account found" in msg.lower()
+
+    # Mismatched confirmation password
+    ok, msg = auth.reset_password_by_email(email, "NewValidPass123!", "DifferentPass123!")
+    assert ok is False
+    assert "do not match" in msg.lower()
+
+    # Too short password
+    ok, msg = auth.reset_password_by_email(email, "short", "short")
+    assert ok is False
+
+    # Successful reset
+    ok, msg = auth.reset_password_by_email(email, "NewSecurePassword123!", "NewSecurePassword123!")
+    assert ok is True
+    assert "successfully" in msg.lower()
+
+    # Verify old password no longer works
+    ok, _, _ = auth.authenticate(email, "TestSecret123!")
+    assert ok is False
+
+    # Verify new password works
+    ok, _, profile = auth.authenticate(email, "NewSecurePassword123!")
+    assert ok is True
+    assert profile["email"] == email

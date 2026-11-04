@@ -72,6 +72,17 @@ with tab_details:
                 else:
                     st.error(msg)
 
+        with st.expander("🔄 Forgot Current Password? Direct Reset"):
+            with st.form("profile_forgot_password_form"):
+                p_new_pwd = st.text_input("New Password (min 8 chars)", type="password", key="prof_new_pwd")
+                p_confirm_pwd = st.text_input("Confirm New Password", type="password", key="prof_confirm_pwd")
+                if st.form_submit_button("Reset Password Without Current"):
+                    ok, msg = auth_service.reset_password_by_email(user["email"], p_new_pwd, p_confirm_pwd)
+                    if ok:
+                        st.success(msg)
+                    else:
+                        st.error(msg)
+
 with tab_refer:
     st.markdown("### 🤝 Refer Friends, Multiply Green Impact")
     st.write(

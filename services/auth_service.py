@@ -131,6 +131,42 @@ class AuthService:
             return True, "Password updated successfully."
         return False, "Failed to update password."
 
+    def reset_password_by_email(
+        self,
+        email: str,
+        new_password: str,
+        confirm_password: Optional[str] = None,
+    ) -> Tuple[bool, str]:
+        """
+        Resets user password via registered email without requiring the old password.
+        Validates email existence, password rules, and matching confirmation.
+        """
+        if not email or not email.strip():
+            return False, "Please enter your registered email address."
+
+        clean_email = email.strip().lower()
+        user = self.user_repo.get_by_email(clean_email)
+        if not user:
+            return False, f"No account found with email '{clean_email}'. Please verify your email or sign up."
+
+        if not user.get("is_active", 1):
+            return False, "This account is currently deactivated. Please contact support."
+
+        if confirm_password is not None and new_password != confirm_password:
+            return False, "New passwords do not match. Please verify both fields."
+
+        ok, msg = validate_password(new_password)
+        if not ok:
+            return False, msg
+
+        new_hash = hash_password(new_password)
+        success = self.user_repo.update_password(user["id"], new_hash)
+        if success:
+            logger.info(f"Password reset completed for email: {clean_email} (User ID: {user['id']})")
+            return True, "✅ Password reset successfully! You can now log in with your new password."
+
+        return False, "Failed to reset password due to a server error. Please try again."
+
     def update_profile(self, user_id: int, display_name: str) -> Tuple[bool, str]:
         """Updates user profile display name."""
         ok, msg = validate_name(display_name)

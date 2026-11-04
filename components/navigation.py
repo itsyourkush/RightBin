@@ -127,6 +127,23 @@ def render_sidebar() -> Optional[Dict[str, Any]]:
                         else:
                             st.error(msg)
 
+            with st.expander("🔑 Forgot Password?", expanded=False):
+                with st.form("sidebar_forgot_form"):
+                    sb_email = st.text_input("Registered Email", placeholder="you@university.edu", key="sb_forgot_email").strip()
+                    sb_new_pwd = st.text_input("New Password (min 8 chars)", type="password", key="sb_forgot_pwd")
+                    sb_confirm_pwd = st.text_input("Confirm Password", type="password", key="sb_forgot_confirm_pwd")
+                    sb_reset_submit = st.form_submit_button("Reset Password", use_container_width=True)
+                    if sb_reset_submit:
+                        ok, msg = auth_service.reset_password_by_email(sb_email, sb_new_pwd, sb_confirm_pwd)
+                        if ok:
+                            st.success(msg)
+                            _, _, profile = auth_service.authenticate(sb_email, sb_new_pwd)
+                            if profile:
+                                st.session_state["user"] = profile
+                                st.rerun()
+                        else:
+                            st.error(msg)
+
             st.divider()
 
         # Helpful quick links & viva details
@@ -153,7 +170,7 @@ def require_auth() -> Optional[Dict[str, Any]]:
     user = st.session_state.get("user")
     if not user:
         st.warning("🔒 **Authentication Required** — Please sign in or create an account to access this page.")
-        tab_login, tab_register = st.tabs(["🔑 Sign In", "📝 Create Account"])
+        tab_login, tab_register, tab_forgot = st.tabs(["🔑 Sign In", "📝 Create Account", "🔄 Forgot / Reset Password"])
         auth_svc = get_auth_service()
 
         with tab_login:
@@ -186,6 +203,32 @@ def require_auth() -> Optional[Dict[str, Any]]:
                         _, _, profile = auth_svc.authenticate(reg_email, reg_pwd)
                         st.session_state["user"] = profile
                         st.rerun()
+                    else:
+                        st.error(msg)
+
+        with tab_forgot:
+            st.markdown(
+                """
+                <div style="margin-bottom: 12px; color: #475569; font-size: 0.9rem;">
+                    Forgot your password? Enter your registered email address and enter a new password below.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            with st.form("page_require_forgot_form"):
+                f_email = st.text_input("Registered Email Address", placeholder="you@university.edu", key="req_forgot_email").strip()
+                f_new_pwd = st.text_input("New Password (min 8 chars)", type="password", key="req_forgot_pwd")
+                f_confirm_pwd = st.text_input("Confirm New Password", type="password", key="req_forgot_confirm_pwd")
+                f_submitted = st.form_submit_button("Update Password", use_container_width=True)
+                if f_submitted:
+                    ok, msg = auth_svc.reset_password_by_email(f_email, f_new_pwd, f_confirm_pwd)
+                    if ok:
+                        st.success(msg)
+                        # Auto-login with new password
+                        _, _, profile = auth_svc.authenticate(f_email, f_new_pwd)
+                        if profile:
+                            st.session_state["user"] = profile
+                            st.rerun()
                     else:
                         st.error(msg)
 
